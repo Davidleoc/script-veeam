@@ -15,9 +15,6 @@ LOGS_PATH=$(echo "$LOGS_PATHS" | sort -r | head -n1)
 # Extrai o nome do job a partir do caminho
 JOB_NAME=$(echo "$LOGS_PATH" | sed -E 's#.*/Backup/(.+)/Session_.*/Job.log#\1#')
 
-# Extrai o progresso real do log com base no formato correto
-LAST_PROGRESS_LINE=$(grep -i "Session progress" "$LOGS_PATH" | tail -n1)
-
 # Extrai progresso real do log buscando linha com "Backup ["
 PROGRESS_LINE=$(grep -oP 'Backup \[.*\]\s+[0-9]{1,3}%' "$LOGS_PATH" | tail -n1)
 
