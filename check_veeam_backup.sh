@@ -29,13 +29,16 @@ else
 fi
 
 # Extrai a última linha com taxa de processamento (rate)
-LAST_RATE_LINE=$(grep -i "Total processed" "$LOGS_PATH" | tail -n1)
-if [[ -n "$LAST_RATE_LINE" ]]; then
-    RATE=$(echo "$LAST_RATE_LINE" | grep -oP 'Rate:\s*\K[0-9.]+\s*[KMGT]?B/s')
-    RATE=${RATE:-"N/A"}
+# Extrai progresso real do log buscando linha com "Backup ["
+PROGRESS_LINE=$(grep -oP 'Backup \[.*\]\s+[0-9]{1,3}%' "$LOGS_PATH" | tail -n1)
+
+if [[ -n "$PROGRESS_LINE" ]]; then
+    PROGRESS=$(echo "$PROGRESS_LINE" | grep -oP '[0-9]{1,3}(?=%)')
+    PROGRESS=${PROGRESS:-"0"}
 else
-    RATE="Desconhecido"
+    PROGRESS="Desconhecido"
 fi
+
 
 # Verifica se o backup foi finalizado
 if grep -qi "Backup finished" "$LOGS_PATH"; then
