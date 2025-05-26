@@ -18,6 +18,25 @@ JOB_NAME=$(echo "$LOGS_PATH" | sed -E 's#.*/Backup/(.+)/Session_.*/Job.log#\1#')
 # Extrai o progresso real do log com base no formato correto
 PROGRESS=$(grep "Session progress" "$LOGS_PATH" | tail -n1 | grep -oP 'Session progress: \K[0-9]{1,3}(?=%)' || echo "Desconhecido")
 
+# Extrai o progresso real do log com base no formato correto
+LAST_PROGRESS_LINE=$(grep -i "Session progress" "$LOGS_PATH" | tail -n1)
+
+if [[ -n "$LAST_PROGRESS_LINE" ]]; then
+    PROGRESS=$(echo "$LAST_PROGRESS_LINE" | grep -oP '[Ss]ession progress:\s*\K[0-9]{1,3}(?=%)')
+    PROGRESS=${PROGRESS:-"0"}
+else
+    PROGRESS="Desconhecido"
+fi
+
+# Extrai a última linha com taxa de processamento (rate)
+LAST_RATE_LINE=$(grep -i "Total processed" "$LOGS_PATH" | tail -n1)
+if [[ -n "$LAST_RATE_LINE" ]]; then
+    RATE=$(echo "$LAST_RATE_LINE" | grep -oP 'Rate:\s*\K[0-9.]+\s*[KMGT]?B/s')
+    RATE=${RATE:-"N/A"}
+else
+    RATE="Desconhecido"
+fi
+
 # Verifica se o backup foi finalizado
 if grep -qi "Backup finished" "$LOGS_PATH"; then
     STATUS="FINALIZADO"
@@ -30,6 +49,6 @@ else
     STATUS="EM EXECUCAO"
 fi
 
-echo "OK: Backup '$JOB_NAME' $STATUS, progresso: ${PROGRESS}%"
+echo "OK: Backup '$JOB_NAME' $STATUS, progresso: ${PROGRESS}%, taxa: ${RATE}"
 exit 0
 
