@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Caminho base onde os logs das sessões estão
@@ -15,21 +16,20 @@ LOGS_PATH=$(echo "$LOGS_PATHS" | sort -r | head -n1)
 # Extrai o nome do job a partir do caminho
 JOB_NAME=$(echo "$LOGS_PATH" | sed -E 's#.*/Backup/(.+)/Session_.*/Job.log#\1#')
 
-# Extrai progresso real do log buscando linha com "Backup ["
-PROGRESS_LINE=$(grep -oP 'Backup \[.*\]\s+[0-9]{1,3}%' "$LOGS_PATH" | tail -n1)
-
+# Extrai a última linha com progresso do backup
+PROGRESS_LINE=$(grep -oP 'Backup \[.*\].*?\K[0-9]{1,3}(?=%)' "$LOGS_PATH" | tail -n1)
 if [[ -n "$PROGRESS_LINE" ]]; then
-    PROGRESS=$(echo "$PROGRESS_LINE" | grep -oP '[0-9]{1,3}(?=%)')
+    PROGRESS="$PROGRESS_LINE"
     PROGRESS=${PROGRESS:-"0"}
 else
     PROGRESS="Desconhecido"
 fi
 
-# Extrai a última linha com taxa de processamento (rate)
-LAST_RATE_LINE=$(grep -i "Total processed" "$LOGS_PATH" | tail -n1)
-if [[ -n "$LAST_RATE_LINE" ]]; then
-    RATE=$(echo "$LAST_RATE_LINE" | grep -oP 'Rate:\s*\K[0-9.]+\s*[KMGT]?B/s')
-    RATE=${RATE:-"N/A"}
+# Extrai a última linha com taxa de processamento (speed)
+SPEED_LINE=$(grep -i "Session progress" "$LOGS_PATH" | grep -Eo 'speed:\s*[0-9]+' | tail -n1)
+if [[ -n "$SPEED_LINE" ]]; then
+    SPEED=$(echo "$SPEED_LINE" | grep -oP '[0-9]+')
+    RATE="${SPEED} B/s"
 else
     RATE="Desconhecido"
 fi
@@ -48,5 +48,7 @@ fi
 
 echo "OK: Backup '$JOB_NAME' $STATUS, progresso: ${PROGRESS}%, taxa: ${RATE}"
 exit 0
+                 
+
 
 
