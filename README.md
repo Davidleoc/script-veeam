@@ -67,6 +67,7 @@ O Veeam permite restaurar:
   - Se está em execução
   - Se finalizou
   - Porcentagem de progresso
+  - Porcentaagem de pacotes transferidos
   - Armazena os logs dos backups finalizados para auditoria.
 
 ---
