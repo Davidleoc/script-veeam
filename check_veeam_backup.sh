@@ -17,7 +17,7 @@ LOGS_PATH=$(echo "$LOGS_PATHS" | sort -r | head -n1)
 JOB_NAME=$(echo "$LOGS_PATH" | sed -E 's#.*/Backup/(.+)/Session_.*/Job.log#\1#')
 
 # Extrai a última linha com progresso do backup
-PROGRESS_LINE=$(grep -oP 'Backup \[.*\].*?\K[0-9]{1,3}(?=%)' "$LOGS_PATH" | tail -n1)
+PROGRESS_LINE=$(grep -oP 'Session progress:\s*\K[0-9]{1,3}(?=%)' "$LOGS_PATH" | tail -n1)
 if [[ -n "$PROGRESS_LINE" ]]; then
     PROGRESS="$PROGRESS_LINE"
     PROGRESS=${PROGRESS:-"0"}
@@ -48,7 +48,3 @@ fi
 
 echo "OK: Backup '$JOB_NAME' $STATUS, progresso: ${PROGRESS}%, taxa: ${RATE}"
 exit 0
-                 
-
-
-
