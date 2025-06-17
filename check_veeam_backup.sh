@@ -47,5 +47,5 @@ else
     STATUS="EM EXECUCAO"
 fi
 
-echo "OK: Backup '$JOB_NAME' $STATUS, progresso: $PROGRESS%, taxa: $RATE"
+echo "OK: Backup '$JOB_NAME' $STATUS, Progresso: $PROGRESS%, Taxa: $RATE"
 exit 0
