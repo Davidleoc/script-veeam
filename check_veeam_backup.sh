@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Caminho base onde os logs das sessões estão
@@ -18,20 +17,22 @@ JOB_NAME=$(echo "$LOGS_PATH" | sed -E 's#.*/Backup/(.+)/Session_.*/Job.log#\1#')
 
 # Extrai a última linha com progresso do backup
 PROGRESS_LINE=$(grep -oP 'Session progress:\s*\K[0-9]{1,3}(?=%)' "$LOGS_PATH" | tail -n1)
-if [[ -n "$PROGRESS_LINE" ]]; then
-    PROGRESS="$PROGRESS_LINE"
-    PROGRESS=${PROGRESS:-"0"}
+if [[ "$PROGRESS_LINE" == null ]]; then
+        PROGRESS="Desconhecido"
 else
-    PROGRESS="Desconhecido"
+        PROGRESS="$PROGRESS_LINE"
+        PROGRESS=${PROGRESS:-"0"}
 fi
 
 # Extrai a última linha com taxa de processamento (speed)
 SPEED_LINE=$(grep -i "Session progress" "$LOGS_PATH" | grep -Eo 'speed:\s*[0-9]+' | tail -n1)
-if [[ -n "$SPEED_LINE" ]]; then
-    SPEED=$(echo "$SPEED_LINE" | grep -oP '[0-9]+')
-    RATE="${SPEED} B/s"
+if [[ "$SPEED_LINE" == null ]]; then
+        RATE="Desconhecido"
 else
-    RATE="Desconhecido"
+        SPEED=$(echo "$SPEED_LINE" | grep -oP '[0-9]+')
+        SPEED_KB=$((SPEED / 1024))
+        RATE="${SPEED_KB} KB/s"
+
 fi
 
 # Verifica se o backup foi finalizado
@@ -46,5 +47,5 @@ else
     STATUS="EM EXECUCAO"
 fi
 
-echo "OK: Backup '$JOB_NAME' $STATUS, progresso: ${PROGRESS}%, taxa: ${RATE}"
+echo "OK: Backup '$JOB_NAME' $STATUS, progresso: $PROGRESS%, taxa: $RATE"
 exit 0
